@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            background: linear-gradient(135deg, #020c1b 0%, #0a1f3d 50%, #123b68 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+        }
+
+        /* Lumulutang na background hearts */
+        .bg-heart {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 20px;
+            animation: float 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 35px 22px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            width: 100%;
+            max-width: 380px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            color: #0a2a52;
+            font-size: clamp(20px, 5.5vw, 26px);
+            margin: 0 0 12px;
+        }
+
+        p {
+            color: #57606f;
+            font-size: clamp(14px, 3.8vw, 16px);
+            line-height: 1.6;
+            margin: 0 0 25px;
+        }
+
+        .heart {
+            font-size: 55px;
+            animation: heartbeat 1.2s infinite;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            min-height: 60px;
+            width: 100%;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #yesBtn {
+            background-color: #0a2a52;
+            color: white;
+            box-shadow: 0 4px 15px rgba(10, 42, 82, 0.4);
+            z-index: 10;
+        }
+
+        #noBtn {
+            background-color: #dfe4ea;
+            color: #2f3542;
+            position: fixed; /* Ginawang fixed para makatatak sa buong screen */
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #successMessage {
+            color: #0a2a52;
+            font-weight: bold;
+            font-size: 17px;
+            line-height: 1.6;
+            margin-top: 15px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="confettiCanvas"></canvas>
+
+    <div class="card" id="mainCard">
+
+        <div class="heart" id="mainHeart">💙</div>
+
+        <h1>hi, baby Earl Vincent! HAHAHAHA 🥰</h1>
+
+        <p id="questionText">
+            May bug kasi sa sistema ko ngayon...<br>
+            Ikaw kaya ang solusyon o ikaw ang dahilan kung bakit tuluyan na akong nahulog?
+        </p>
+
+        <div class="btn-container" id="buttonArea">
+            <button id="yesBtn" onclick="sayYes()">
+                oo, ako na! 💙
+            </button>
+
+            <button id="noBtn">
+                hindi
+            </button>
+        </div>
+
+        <div id="successMessage" class="hidden">
+            yieee! sabi na crush ako neto e HAHAHA 😭💙
+            <br><br>
+            more chicks to come boi<strong>HAHAHA💙✨</strong>
+        </div>
+
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+
+        // Ilagay ang "Hindi" button sa katabi ng "Oo" button sa simula
+        function initNoBtnPosition() {
+            const yesBtn = document.getElementById('yesBtn');
+            const rect = yesBtn.getBoundingClientRect();
+            noBtn.style.left = (rect.right + 15) + 'px';
+            noBtn.style.top = rect.top + 'px';
+        }
+
+        window.onload = initNoBtnPosition;
+        window.onresize = initNoBtnPosition;
+
+        // Tatakas sa buong screen ng cellphone tuwing ibababa ang daliri o mouse
+        function moveNoButton(e) {
+            if (e) e.preventDefault(); // Iwasan ang default touch behavior
+
+            const padding = 20;
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+
+            // Maximum bounds sa screen
+            const maxX = window.innerWidth - btnWidth - padding;
+            const maxY = window.innerHeight - btnHeight - padding;
+
+            const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        // Support sa parehong Mobile Touch & Desktop Mouse
+        noBtn.addEventListener('touchstart', moveNoButton, { passive: false });
+        noBtn.addEventListener('mouseover', moveNoButton);
+        noBtn.addEventListener('click', moveNoButton);
+
+        // Background Hearts
+        function createHearts() {
+            const body = document.body;
+            for (let i = 0; i < 12; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('bg-heart');
+                heart.innerHTML = Math.random() > 0.5 ? '💙' : '🤍';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                heart.style.animationDelay = (Math.random() * 4) + 's';
+                body.appendChild(heart);
+            }
+        }
+        createHearts();
+
+        // Kapag pinindot ang "Oo"
+        function sayYes() {
+            document.getElementById('buttonArea').style.display = 'none';
+            document.getElementById('questionText').style.display = 'none';
+            noBtn.style.display = 'none';
+            document.getElementById('successMessage').classList.remove('hidden');
+            document.getElementById('mainHeart').innerHTML = '💖';
+            startConfetti();
+        }
+
+        // Confetti Effect
+        function startConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const colors = ['#0a2a52', '#123b68', '#74b9ff', '#ff7675', '#fd79a8', '#ffffff'];
+
+            for (let i = 0; i < 100; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 4 + 2,
+                    rotation: Math.random() * 360
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach((p) => {
+                    p.y += p.speed;
+                    p.rotation += 2;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+
+                    if (p.y > canvas.height) p.y = -20;
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+    </script>
+
+</body>
+</html>s
